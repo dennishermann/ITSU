@@ -234,7 +234,7 @@ function ImagesList() {
 						<button
 							onClick={async () => {
 								await navigator.clipboard.writeText(it.processed_url);
-								alert('Copied URL');
+								try { window.dispatchEvent(new CustomEvent('app:toast-bottom', { detail: 'Copied URL' })); } catch {}
 							}}
 							className="rounded-lg border px-3 py-1.5 text-sm hover:bg-neutral-50"
 						>
