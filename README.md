@@ -4,7 +4,7 @@ Upload an image → remove background → flip horizontally → host publicly an
  
 Anonymous ownership via `sid` cookie, with TTL auto-delete.
 
-Live URL: https://itsu-five.vercel.app/
+Live URL: https://itsu-mocha.vercel.app/
 
 ### Architecture
 
