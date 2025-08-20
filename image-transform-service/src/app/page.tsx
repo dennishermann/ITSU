@@ -2,6 +2,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 export default function Page() {
+	const [toast, setToast] = useState<string | null>(null);
+	const toastTimer = useRef<number | null>(null);
+
+	useEffect(() => {
+		const handler = (ev: Event) => {
+			const e = ev as unknown as CustomEvent<string>;
+			setToast(e.detail || 'Done');
+			if (toastTimer.current) window.clearTimeout(toastTimer.current);
+			toastTimer.current = window.setTimeout(() => setToast(null), 5000);
+		};
+		window.addEventListener('app:toast', handler as EventListener);
+		return () => {
+			window.removeEventListener('app:toast', handler as EventListener);
+			if (toastTimer.current) window.clearTimeout(toastTimer.current);
+		};
+	}, []);
+
 	return (
 		<main className="min-h-screen bg-neutral-50 text-neutral-900">
 			<div className="mx-auto max-w-3xl p-6 lg:p-10">
@@ -14,6 +31,11 @@ export default function Page() {
 						<h2 className="mb-2 text-lg font-semibold">Upload</h2>
 						<UploadCard />
 					</div>
+					{toast && (
+						<div role="status" aria-live="polite" className="rounded-lg bg-black px-4 py-2 text-sm text-white shadow-sm">
+							{toast}
+						</div>
+					)}
 					<div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
 						<h2 className="mb-2 text-lg font-semibold">My Images</h2>
 						<ImagesList />
@@ -37,17 +59,28 @@ function UploadCard() {
 	'use client';
 	const [file, setFile] = useState<File | null>(null);
 	const [busy, setBusy] = useState(false);
-	const [result, setResult] = useState<null | { id: string; processedUrl: string; bgProvider: 'removebg' | 'clipdrop' | 'none' }>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [dragActive, setDragActive] = useState(false);
+	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 	const inputRef = useRef<HTMLInputElement | null>(null);
+
+	useEffect(() => {
+		if (!file) {
+			if (previewUrl) URL.revokeObjectURL(previewUrl);
+			setPreviewUrl(null);
+			return;
+		}
+		const url = URL.createObjectURL(file);
+		setPreviewUrl(url);
+		return () => URL.revokeObjectURL(url);
+	}, [file]);
 
 	async function onSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		if (!file) return;
 		setError(null);
 		setBusy(true);
-		setResult(null);
+		// keep preview while processing
 		try {
 			const data = new FormData();
 			data.append('file', file);
@@ -57,7 +90,11 @@ function UploadCard() {
 				throw new Error(body.error || `Upload failed (${res.status})`);
 			}
 			const body = (await res.json()) as { id: string; processedUrl: string; bgProvider: 'removebg' | 'clipdrop' | 'none' };
-			setResult(body);
+			// Reset selection, refresh list, and show a toast
+			setFile(null);
+			if (inputRef.current) inputRef.current.value = '';
+			try { window.dispatchEvent(new Event('images:refresh')); } catch {}
+			try { window.dispatchEvent(new CustomEvent('app:toast', { detail: 'Image processed successfully' })); } catch {}
 		} catch (err: unknown) {
 			setError(err instanceof Error ? err.message : 'Something went wrong');
 		} finally {
@@ -66,37 +103,52 @@ function UploadCard() {
 	}
 
 	return (
+		<>
 		<form onSubmit={onSubmit} className="grid gap-3">
-			<div
-				onDragOver={(e) => {
-					e.preventDefault();
-					setDragActive(true);
-				}}
-				onDragLeave={() => setDragActive(false)}
-				onDrop={(e) => {
-					e.preventDefault();
-					setDragActive(false);
-					const f = e.dataTransfer.files?.[0];
-					if (f) setFile(f);
-				}}
-				role="button"
-				aria-label="Drag and drop image or click to browse"
-				onClick={() => inputRef.current?.click()}
-				className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center ${dragActive ? 'border-black bg-neutral-50' : 'border-neutral-300 hover:border-neutral-400'}`}
-			>
-				<div className="text-sm text-neutral-700">Drag and drop an image here, or click to select</div>
-				<div className="text-xs text-neutral-500">PNG, JPEG, or WebP, up to 10 MB</div>
-				<input
-					ref={inputRef}
-					aria-label="Image file"
-					type="file"
-					accept="image/png,image/jpeg,image/webp"
-					onChange={(e) => setFile(e.target.files?.[0] || null)}
-					className="hidden"
-				/>
-			</div>
-			{file && (
-				<p className="text-xs text-neutral-600">Selected: {file.name}</p>
+			{!file ? (
+				<div
+					onDragOver={(e) => {
+						e.preventDefault();
+						setDragActive(true);
+					}}
+					onDragLeave={() => setDragActive(false)}
+					onDrop={(e) => {
+						e.preventDefault();
+						setDragActive(false);
+						const f = e.dataTransfer.files?.[0];
+						if (f) setFile(f);
+					}}
+					role="button"
+					aria-label="Drag and drop image or click to browse"
+					onClick={() => inputRef.current?.click()}
+					className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center ${dragActive ? 'border-black bg-neutral-50' : 'border-neutral-300 hover:border-neutral-400'}`}
+				>
+					<div className="text-sm text-neutral-700">Drag and drop an image here, or click to select</div>
+					<div className="text-xs text-neutral-500">PNG, JPEG, or WebP, up to 10 MB</div>
+					<input
+						ref={inputRef}
+						aria-label="Image file"
+						type="file"
+						accept="image/png,image/jpeg,image/webp"
+						onChange={(e) => setFile(e.target.files?.[0] || null)}
+						className="hidden"
+					/>
+				</div>
+			) : (
+				<div className="flex items-center justify-between gap-3 rounded-xl border p-3">
+					<div className="flex items-center gap-3">
+						{previewUrl && <img src={previewUrl} alt={file.name} className="h-20 w-20 rounded object-cover" />}
+						<p className="text-sm text-neutral-700">{file.name}</p>
+					</div>
+					<button
+						type="button"
+						onClick={() => { setFile(null); if (inputRef.current) inputRef.current.value=''; }}
+						className="rounded-lg border px-3 py-1.5 text-sm hover:bg-neutral-50"
+						disabled={busy}
+					>
+						Cancel
+					</button>
+				</div>
 			)}
 			<button
 				disabled={!file || busy}
@@ -110,31 +162,9 @@ function UploadCard() {
 				)}
 			</button>
 			{error && <p className="text-sm text-red-600">{error}</p>}
-			{result && (
-				<div className="mt-2 rounded-xl border border-neutral-200 p-3">
-					{result.bgProvider === 'none' && (
-						<div className="mb-2 rounded-md bg-amber-50 p-2 text-sm text-amber-900">
-							Background removal temporarily unavailable, performed flip only.
-						</div>
-					)}
-					<div className="flex items-center gap-3">
-						<img src={result.processedUrl} alt="Processed" className="h-20 w-20 rounded object-cover" />
-						<div className="flex gap-2">
-							<a href={result.processedUrl} target="_blank" rel="noreferrer" className="rounded-lg border px-3 py-1.5 text-sm hover:bg-neutral-50">Open</a>
-							<button
-								onClick={async () => {
-								await navigator.clipboard.writeText(result.processedUrl);
-								alert('Copied URL');
-							}}
-							className="rounded-lg border px-3 py-1.5 text-sm hover:bg-neutral-50"
-							>
-								Copy URL
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
+			{/* Result preview intentionally hidden; the list below updates immediately */}
 		</form>
+		</>
 	);
 }
 
@@ -156,6 +186,9 @@ function ImagesList() {
 
 	useEffect(() => {
 		load();
+		const listener = () => load();
+		window.addEventListener('images:refresh', listener);
+		return () => window.removeEventListener('images:refresh', listener);
 	}, []);
 
 	async function onDelete(id: string) {
@@ -180,6 +213,15 @@ function ImagesList() {
 					</div>
 					<div className="flex gap-2">
 						<a href={it.processed_url} target="_blank" rel="noreferrer" className="rounded-lg border px-3 py-1.5 text-sm hover:bg-neutral-50">Open</a>
+						<button
+							onClick={async () => {
+								await navigator.clipboard.writeText(it.processed_url);
+								alert('Copied URL');
+							}}
+							className="rounded-lg border px-3 py-1.5 text-sm hover:bg-neutral-50"
+						>
+							Copy URL
+						</button>
 						<button onClick={() => onDelete(it.id)} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-neutral-50">Delete</button>
 					</div>
 				</li>
