@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 export default function Page() {
 	const [toast, setToast] = useState<string | null>(null);
 	const toastTimer = useRef<number | null>(null);
+	const [bottomToast, setBottomToast] = useState<string | null>(null);
+	const bottomToastTimer = useRef<number | null>(null);
 
 	useEffect(() => {
 		const handler = (ev: Event) => {
@@ -13,9 +15,19 @@ export default function Page() {
 			toastTimer.current = window.setTimeout(() => setToast(null), 5000);
 		};
 		window.addEventListener('app:toast', handler as EventListener);
+
+		const bottomHandler = (ev: Event) => {
+			const e = ev as unknown as CustomEvent<string>;
+			setBottomToast(e.detail || 'Done');
+			if (bottomToastTimer.current) window.clearTimeout(bottomToastTimer.current);
+			bottomToastTimer.current = window.setTimeout(() => setBottomToast(null), 5000);
+		};
+		window.addEventListener('app:toast-bottom', bottomHandler as EventListener);
 		return () => {
 			window.removeEventListener('app:toast', handler as EventListener);
+			window.removeEventListener('app:toast-bottom', bottomHandler as EventListener);
 			if (toastTimer.current) window.clearTimeout(toastTimer.current);
+			if (bottomToastTimer.current) window.clearTimeout(bottomToastTimer.current);
 		};
 	}, []);
 
@@ -40,6 +52,11 @@ export default function Page() {
 						<h2 className="mb-2 text-lg font-semibold">My Images</h2>
 						<ImagesList />
 					</div>
+					{bottomToast && (
+						<div role="status" aria-live="polite" className="rounded-lg bg-black px-4 py-2 text-sm text-white shadow-sm">
+							{bottomToast}
+						</div>
+					)}
 				</section>
 			</div>
 		</main>
@@ -194,6 +211,7 @@ function ImagesList() {
 	async function onDelete(id: string) {
 		await fetch(`/api/images/${id}`, { method: 'DELETE' });
 		setItems((prev) => prev.filter((i) => i.id !== id));
+		try { window.dispatchEvent(new CustomEvent('app:toast-bottom', { detail: 'Image deleted successfully' })); } catch {}
 	}
 
 	if (loading) return <p className="text-sm text-neutral-600">Loading…</p>;
