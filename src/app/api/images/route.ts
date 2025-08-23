@@ -1,10 +1,10 @@
-import { NextRequest } from 'next/server';
+//
 import { getOrSetSid } from '@/lib/session';
 import { lazyCleanupForSid } from '@/lib/cleanup';
 
 export const runtime = 'nodejs';
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
 	const sid = await getOrSetSid();
 	lazyCleanupForSid(sid).catch(() => {});
 	const url = new URL(`${process.env.SUPABASE_URL}/rest/v1/images`);

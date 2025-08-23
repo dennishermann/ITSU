@@ -13,8 +13,10 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.55.0",
     "file-type": "^21.0.0",
+    "framer-motion": "^12.23.12",
     "next": "15.4.7",
     "react": "19.1.0",
+    "react-compare-image": "^3.5.7",
     "react-dom": "19.1.0",
     "sharp": "^0.34.3",
     "zod": "^4.0.17"
@@ -22,12 +24,16 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20.19.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/ui": "^3.2.4",
     "eslint": "^9",
     "eslint-config-next": "15.4.7",
+    "jsdom": "^26.1.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.2.4"

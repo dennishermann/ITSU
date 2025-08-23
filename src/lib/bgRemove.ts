@@ -67,7 +67,7 @@ export async function removeBackgroundWithFallback(input: Uint8Array): Promise<{
 	try {
 		const out = await callClipDrop(input);
 		return { buffer: out, provider: 'clipdrop' };
-	} catch (_e) {
+	} catch {
 		// continue to none
 	}
 

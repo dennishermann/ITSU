@@ -9,7 +9,7 @@ function makePngBuffer(width = 8, height = 6) {
 describe('validateImage', () => {
 	it('accepts png/jpg/webp', async () => {
 		const png = await makePngBuffer();
-		const ok = await validateImage(png);
+		const ok = await validateImage(new Uint8Array(png));
 		expect(ok.ok).toBe(true);
 	});
 });
@@ -17,7 +17,7 @@ describe('validateImage', () => {
 describe('flipHorizontalToPng', () => {
 	it('returns png and preserves dimensions', async () => {
 		const png = await makePngBuffer(10, 4);
-		const out = await flipHorizontalToPng(png);
+		const out = await flipHorizontalToPng(new Uint8Array(png));
 		const meta = await sharp(out).metadata();
 		expect(meta.format).toBe('png');
 		expect(meta.width).toBe(10);
