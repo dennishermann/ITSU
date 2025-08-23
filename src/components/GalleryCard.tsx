@@ -32,6 +32,7 @@ export default function GalleryCard({ item, onView, onCopy, onDelete }: {
                 <span
                   onClick={(e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     onView?.(item);
                   }}
                   className="cursor-pointer rounded-full border border-[#7c4dff]/50 bg-[#7c4dff]/20 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#7c4dff]/30"
@@ -41,6 +42,7 @@ export default function GalleryCard({ item, onView, onCopy, onDelete }: {
                 <span
                   onClick={async (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     await navigator.clipboard.writeText(item.processed_url);
                     onCopy?.(item.processed_url);
                   }}
@@ -51,6 +53,7 @@ export default function GalleryCard({ item, onView, onCopy, onDelete }: {
                 <span
                   onClick={(e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     onDelete?.(item.id);
                   }}
                   className="cursor-pointer rounded-full border border-red-500/40 bg-red-500/15 px-3 py-1.5 text-xs font-medium text-red-200 hover:bg-red-500/25"

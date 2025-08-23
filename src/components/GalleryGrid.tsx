@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import GalleryCard, { GalleryCardItem } from './GalleryCard';
 
 export type Item = { id: string; processed_url: string; original_filename: string | null; created_at: string };
@@ -8,20 +8,23 @@ export default function GalleryGrid({ onSelect, initialId, onDeleted, onCopy }: 
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const didSelectRef = useRef(false);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/images");
       const body = (await res.json()) as { items: Item[] };
       setItems(body.items);
-      if (initialId) {
+      if (initialId && !didSelectRef.current) {
         const found = body.items.find((i) => i.id === initialId);
         if (found) onSelect?.(found);
+        didSelectRef.current = true;
       }
     } finally {
       setLoading(false);
     }
-  }, [initialId, onSelect]);
+  }, [initialId]);
 
   useEffect(() => {
     load();
