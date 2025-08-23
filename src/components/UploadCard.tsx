@@ -59,7 +59,7 @@ export default function UploadCard() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-3">
+    <form onSubmit={onSubmit} className="grid gap-3 px-4 sm:px-0">
       {!file ? (
         <div
           onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
@@ -68,22 +68,22 @@ export default function UploadCard() {
           role="button"
           aria-label="Drag and drop image or click to browse"
           onClick={() => inputRef.current?.click()}
-          className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center ${dragActive ? 'border-[#ff4ecd]/70 bg-black/30' : 'border-[#7c4dff]/60 hover:border-[#ff4ecd]/70'}`}
+          className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-5 text-center sm:p-6 ${dragActive ? 'border-[#ff4ecd]/70 bg-black/30' : 'border-[#7c4dff]/60 hover:border-[#ff4ecd]/70'}`}
         >
-          <div className="text-sm text-neutral-700">Drag and drop an image here, or click to select</div>
-          <div className="text-xs text-neutral-500">PNG, JPEG, or WebP, up to 10 MB</div>
+          <div className="text-sm text-white/80 sm:text-sm">Drag & drop or tap to select</div>
+          <div className="text-xs text-white/60">PNG, JPEG, or WebP • up to 10MB</div>
           <input ref={inputRef} aria-label="Image file" type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setFile(e.target.files?.[0] || null)} className="hidden" />
         </div>
       ) : (
         <div className="flex items-center justify-between gap-3 rounded-xl border border-[#7c4dff]/60 p-3">
           <div className="flex items-center gap-3">
-            {previewUrl && <img src={previewUrl} alt={file.name} className="h-20 w-20 rounded object-cover" />}
-            <p className="text-sm text-white/80">{file.name}</p>
+            {previewUrl && <img src={previewUrl} alt={file.name} className="h-16 w-16 rounded object-cover sm:h-20 sm:w-20" />}
+            <p className="text-sm text-white/80 max-w-[50vw] truncate sm:max-w-none">{file.name}</p>
           </div>
-          <button type="button" onClick={() => { setFile(null); if (inputRef.current) inputRef.current.value = ""; }} className="rounded-lg border border-[#7c4dff]/60 px-3 py-1.5 text-sm text-white hover:bg-[#7c4dff]/10" disabled={busy}>Cancel</button>
+          <button type="button" onClick={() => { setFile(null); if (inputRef.current) inputRef.current.value = ""; }} className="rounded-lg border border-[#7c4dff]/60 px-4 py-2 text-sm text-white hover:bg-[#7c4dff]/10 sm:px-3 sm:py-1.5" disabled={busy}>Cancel</button>
         </div>
       )}
-      <button disabled={!file || busy} type="submit" className="inline-flex w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-[#7c4dff] to-[#ff4ecd] px-5 py-3 text-base font-semibold text-white shadow-sm ring-1 ring-white/10 transition-colors hover:from-[#8b5dff] hover:to-[#ff6ae0] focus:outline-none focus:ring-2 focus:ring-[#ff4ecd]/40 disabled:cursor-not-allowed disabled:opacity-50">
+      <button disabled={!file || busy} type="submit" className="inline-flex w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-[#7c4dff] to-[#ff4ecd] px-4 py-3 text-base font-semibold text-white shadow-sm ring-1 ring-white/10 transition-colors hover:from-[#8b5dff] hover:to-[#ff6ae0] focus:outline-none focus:ring-2 focus:ring-[#ff4ecd]/40 disabled:cursor-not-allowed disabled:opacity-50 sm:px-5">
         {busy ? (<span className="inline-flex items-center gap-2"><Spinner /> Processing…</span>) : (<span>Upload & Transform</span>)}
       </button>
       {error && <p className="text-sm text-red-600">{error}</p>}

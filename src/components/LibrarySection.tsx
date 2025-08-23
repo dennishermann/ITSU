@@ -18,7 +18,7 @@ export default function LibrarySection({
         Your Library <span className="text-white/50 text-sm">(auto-deletes after 7 days)</span>
       </h2>
       <div className="mb-4 flex items-center justify-between text-sm text-white/70"></div>
-      <div className="grid grid-cols-[minmax(740px,1fr)_440px] gap-6">
+      <div className="grid gap-6 lg:grid-cols-[minmax(740px,1fr)_440px]">
         <GalleryGrid
           onSelect={(it) => setSelected(it)}
           initialId={initialSelected}
@@ -38,6 +38,7 @@ export default function LibrarySection({
             }
           }}
         />
+        <div className="hidden lg:block">
         <ViewerPanel
           item={selected ? { id: selected.id, processed_url: selected.processed_url, original_filename: selected.original_filename } : null}
           onCopy={(u) => {
@@ -52,6 +53,18 @@ export default function LibrarySection({
             setSelected(null);
           }}
         />
+        </div>
+        {selected && (
+          <div className="lg:hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm">
+            <div className="absolute inset-x-0 bottom-0 rounded-t-2xl border border-white/10 bg-[#111217] p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="text-sm font-medium">Viewer</div>
+                <button onClick={()=>{ setSelected(null); const url=new URL(window.location.href); url.searchParams.delete('view'); history.replaceState({},'',url.toString()); }} className="rounded-md border border-white/10 px-2 py-1 text-sm hover:bg-white/10">Close</button>
+              </div>
+              <ViewerPanel item={selected} onCopy={(u)=>navigator.clipboard.writeText(u)} onDelete={async (id)=>{ await fetch(`/api/images/${id}`, { method: 'DELETE' }); window.dispatchEvent(new Event('images:refresh')); setSelected(null); }} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -24,9 +24,7 @@ export default function Page() {
 				<Hero />
 				<section id="workbench" className="grid gap-6">
 					<UploadSection />
-
 					<LibrarySection selected={selected} setSelected={setSelected} initialSelected={initialSelected} />
-
 				</section>
 			</div>
 		</main>

@@ -27,15 +27,15 @@ export default function GalleryCard({ item, onView, onCopy, onDelete }: {
             className="object-cover transition duration-200 group-hover:scale-[1.03]"
           />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10">
-            <div className="rounded-b-2xl border border-white/10 bg-black/60 p-2 opacity-0 backdrop-blur-sm transition duration-200 group-hover:opacity-100">
-              <div className="pointer-events-auto flex justify-center gap-2">
+            <div className="rounded-b-2xl border border-white/10 bg-black/60 p-2 opacity-100 backdrop-blur-sm transition duration-200 lg:opacity-0 lg:group-hover:opacity-100">
+              <div className="pointer-events-auto flex justify-center gap-3">
                 <span
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     onView?.(item);
                   }}
-                  className="cursor-pointer rounded-full border border-[#7c4dff]/50 bg-[#7c4dff]/20 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#7c4dff]/30"
+                  className="cursor-pointer rounded-full border border-[#7c4dff]/50 bg-[#7c4dff]/20 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#7c4dff]/30 lg:px-3 lg:py-1.5 lg:text-xs"
                 >
                   View
                 </span>
@@ -46,7 +46,7 @@ export default function GalleryCard({ item, onView, onCopy, onDelete }: {
                     await navigator.clipboard.writeText(item.processed_url);
                     onCopy?.(item.processed_url);
                   }}
-                  className="cursor-pointer rounded-full border border-[#7c4dff]/50 bg-[#7c4dff]/20 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#7c4dff]/30"
+                  className="cursor-pointer rounded-full border border-[#7c4dff]/50 bg-[#7c4dff]/20 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#7c4dff]/30 lg:px-3 lg:py-1.5 lg:text-xs"
                 >
                   Copy
                 </span>
@@ -56,7 +56,7 @@ export default function GalleryCard({ item, onView, onCopy, onDelete }: {
                     e.stopPropagation();
                     onDelete?.(item.id);
                   }}
-                  className="cursor-pointer rounded-full border border-red-500/40 bg-red-500/15 px-3 py-1.5 text-xs font-medium text-red-200 hover:bg-red-500/25"
+                  className="cursor-pointer rounded-full border border-red-500/40 bg-red-500/15 px-4 py-2 text-sm font-medium text-red-200 hover:bg-red-500/25 lg:px-3 lg:py-1.5 lg:text-xs"
                 >
                   Delete
                 </span>
