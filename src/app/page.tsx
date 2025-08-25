@@ -16,8 +16,6 @@ export default function Page() {
 		history.replaceState({}, '', url.toString());
 	}, [selected]);
 
-	useEffect(() => { return () => {}; }, []);
-
 	return (
 		<main className="min-h-screen bg-transparent text-white">
 			<div className="mx-auto max-w-[1280px] p-6 lg:p-10">

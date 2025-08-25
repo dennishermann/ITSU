@@ -2,7 +2,7 @@ import { globalCleanup } from '@/lib/cleanup';
 
 export const runtime = 'nodejs';
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
 	const token = process.env.CLEANUP_TOKEN;
 	const authHeader = req.headers.get('authorization') || '';
 	const url = new URL(req.url);
@@ -13,5 +13,3 @@ export async function POST(req: Request) {
 	const deleted = await globalCleanup();
 	return Response.json({ deleted });
 }
-
-
